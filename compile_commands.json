@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/cory/Workspace/luapulse",
+  "command": "/usr/bin/clang++ -Dluapulse_EXPORTS -I/home/cory/Workspace/luapulse/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-6 -std=gnu++17 -fPIC -o CMakeFiles/luapulse.dir/src/luapulse.cpp.o -c /home/cory/Workspace/luapulse/src/luapulse.cpp",
+  "file": "/home/cory/Workspace/luapulse/src/luapulse.cpp",
+  "output": "CMakeFiles/luapulse.dir/src/luapulse.cpp.o"
+}
+]
