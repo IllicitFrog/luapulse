@@ -1,7 +1,7 @@
 <h1 align="center"> AwesomeWM Luapulse </h1>
 
 <p align="center"><b>Simple C library for interacting with PulseAdudio server.</b>
-<p align="center">All handling of devices is done within awesome configuration for maximum flexibility
+<p align="center">All handling of devices is done within awesome configuration
 
 ### Initialize object:
 
