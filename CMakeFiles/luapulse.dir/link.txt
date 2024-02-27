@@ -1,1 +1,0 @@
-/usr/bin/clang++ -fPIC -shared -Wl,-soname,libluapulse.so -o libluapulse.so CMakeFiles/luapulse.dir/src/luapulse.cpp.o  /usr/lib/liblua5.4.so -lm -L/usr/lib -lglib-2.0 -lpulse 
