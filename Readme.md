@@ -13,7 +13,6 @@ cd luapulse
 cmake -S . -B build
 
 cmake --build build
-### Initialize object:
 ```
 
 ### Usage:
