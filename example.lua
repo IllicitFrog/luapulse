@@ -5,30 +5,38 @@ local sources = {}
 local default_sink
 local default_source
 
-awesome.connect_signal("luapulse::sink_default", function(index)
-	default_sink = index
+awesome.connect_signal("luapulse::sink_default", function(name)
+	default_sink = name
 	--emit update single for widgets
 end)
 
-awesome.connect_signal("luapulse::source_default", function(index)
-	default_source = index
+awesome.connect_signal("luapulse::source_default", function(name)
+	default_source = name
 	--emit update single for widgets
 end)
 
-awesome.connect_signal("luapulse::remove_sink", function(index)
-	sinks[index] = nil
+awesome.connect_signal("luapulse::remove_sink", function(name)
+	for _, v in pairs(sources) do
+		if v.name == name then
+			sources[name] = nil
+		end
+	end
 end)
 
-awesome.connect_signal("luapulse::remove_source", function(index)
-	sources[index] = nil
+awesome.connect_signal("luapulse::remove_source", function(name)
+	for _, v in pairs(sinks) do
+		if v.name == name then
+			sinks[name] = nil
+		end
+	end
 end)
 
 --Sink Update
 awesome.connect_signal("luapulse::update_sink", function(data)
-	if sinks[data.index] then
-		if sinks[data.index].mute ~= data.mute or sinks[data.index].volume ~= data.volume then
-			sinks[data.index].volume = data.volume
-			sinks[data.index].mute = data.mute
+	if sinks[data.name] then
+		if sinks[data.name].mute ~= data.mute or sinks[data.name].volume ~= data.volume then
+			sinks[data.name].volume = data.volume
+			sinks[data.name].mute = data.mute
 			--emit update single for widgets
 		end
 	end
@@ -36,10 +44,10 @@ end)
 
 --Source Update
 awesome.connect_signal("luapulse::update_source", function(data)
-	if sources[data.index] then
-		if sources[data.index].mute ~= data.mute or sources[data.index].volume ~= data.volume then
-			sources[data.index].volume = data.volume
-			sources[data.index].mute = data.mute
+	if sources[data.name] then
+		if sources[data.name].mute ~= data.mute or sources[data.name].volume ~= data.volume then
+			sources[data.name].volume = data.volume
+			sources[data.name].mute = data.mute
 			--emit update single for widgets
 		end
 	end
@@ -47,12 +55,12 @@ end)
 
 --New Sink
 awesome.connect_signal("luapulse::new_sink", function(data)
-	sinks[data.index] = data
+	sinks[data.name] = data
 end)
 
 --New Source
 awesome.connect_signal("luapulse::new_source", function(data)
-	sources[data.index] = data
+	sources[data.name] = data
 end)
 
 --Receive Only Default Device Updates (true)

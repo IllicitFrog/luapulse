@@ -21,7 +21,7 @@ typedef struct {
 typedef struct {
   lua_State *L;
   std::string signal;
-  unsigned int idx;
+  std::string name;
   unsigned int volume;
   int mute;
 } pa_update;
@@ -40,7 +40,7 @@ typedef struct {
 typedef struct {
   lua_State *L;
   std::string signal;
-  unsigned int idx;
+  std::string name;
 } pa_default;
 
 class luapulse {
@@ -178,7 +178,7 @@ private:
         pa_default *def = new pa_default{
             pulse->L,
             "luapulse::sink_default",
-            pulse->default_sink,
+            i->name,
         };
         printf("sink default %d\n", pulse->default_sink);
         g_idle_add(signalDefault, def);
@@ -195,7 +195,7 @@ private:
         pa_default *def = new pa_default{
             pulse->L,
             "luapulse::source_default",
-            pulse->default_sink,
+            i->name,
         };
         g_idle_add(signalDefault, def);
       }
@@ -227,7 +227,7 @@ private:
                          void *userdata) {
     if (!eol) {
       pa_update *upd = new pa_update{
-          (lua_State *)userdata, "luapulse::update_sink", i->index,
+          (lua_State *)userdata, "luapulse::update_sink", i->name,
           pa_cvolume_avg(&i->volume) * 100 / PA_VOLUME_NORM, i->mute};
       g_idle_add(signalUpdate, upd);
     }
@@ -238,7 +238,7 @@ private:
                            void *userdata) {
     if (!eol) {
       pa_update *upd = new pa_update{
-          (lua_State *)userdata, "luapulse::update_source", i->index,
+          (lua_State *)userdata, "luapulse::update_source", i->name,
           pa_cvolume_avg(&i->volume) * 100 / PA_VOLUME_NORM, i->mute};
       g_idle_add(signalUpdate, upd);
     }
@@ -296,7 +296,7 @@ private:
     lua_getfield(def->L, -1, "emit_signal");
     lua_remove(def->L, -2);
     lua_pushstring(def->L, def->signal.c_str());
-    lua_pushnumber(def->L, def->idx);
+    lua_pushstring(def->L, def->name.c_str());
     lua_call(def->L, 2, 0);
     delete def;
     return G_SOURCE_REMOVE;
@@ -309,8 +309,8 @@ private:
     lua_remove(upd->L, -2);
     lua_pushstring(upd->L, upd->signal.c_str());
     lua_newtable(upd->L);
-    lua_pushliteral(upd->L, "index");
-    lua_pushnumber(upd->L, upd->idx);
+    lua_pushliteral(upd->L, "name");
+    lua_pushstring(upd->L, upd->name.c_str());
     lua_rawset(upd->L, -3);
     lua_pushliteral(upd->L, "volume");
     lua_pushnumber(upd->L, upd->volume);
