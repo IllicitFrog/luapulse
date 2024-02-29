@@ -3,7 +3,20 @@
 <p align="center"><b>Simple C library for interacting with PulseAdudio server.</b>
 <p align="center">All handling of devices is done within awesome configuration
 
+
+### Install:
+```bash
+git clone https://github.com/IllicitFrog/luapulse
+
+cd luapulse
+
+cmake -S . -B build
+
+cmake --build build
 ### Initialize object:
+```
+
+### Usage:
 
 ```lua
 local luapulse = require("libluapulse")
