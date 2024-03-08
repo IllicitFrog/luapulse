@@ -6,14 +6,9 @@ local luapulse = require("libluapulse")
 
 ------ Luapulse Signals --------------
 --Default Sink Changed
-awesome.connect_signal("luapulse::sink_default", function(name)
-	config.default_sink = name
-	awesome.emit_signal("pulseaudio::update")
-end)
-
---Default Source Changed
-awesome.connect_signal("luapulse::source_default", function(name)
-	config.default_source = name
+awesome.connect_signal("luapulse::default", function(defaults)
+	config.default_source = defaults.sink
+  config.default_sink = defaults.source
 	awesome.emit_signal("pulseaudio::update")
 end)
 
@@ -71,8 +66,8 @@ awesome.connect_signal("luapulse::new_source", function(data)
 	config.sources[data.name] = data
 end)
 
---Receive Only Default Device Updates (true)
-local lpulse = luapulse(true)
+--start daemon
+local lpulse = luapulse()
 lpulse:run()
 
 --Set Default Sink Volume

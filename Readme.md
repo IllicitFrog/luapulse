@@ -3,7 +3,9 @@
 <p align="center"><b>Simple C library for interacting with PulseAdudio server.</b>
 <p align="center">All handling of devices is done within awesome configuration
 
-
+<p align="center">Made breaking changes no longer are default updates only an option,
+default signal is now combined and cleaned up, race condition happening where default wasn'> [!TIP]
+> set in awesome </p>
 ### Install:
 ```bash
 git clone https://github.com/IllicitFrog/luapulse
@@ -20,9 +22,10 @@ cmake --build build
 ```lua
 local luapulse = require("libluapulse")
 
-local lpulse = luapulse(bool)
---bool - signal only default devices(default true)
+local lpulse = luapulse()
 ```
+
+<s>local lpulse = luapulse(bool)</s>
 
 ### Functions:
  ```lua

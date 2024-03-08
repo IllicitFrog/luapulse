@@ -39,13 +39,13 @@ typedef struct {
 
 typedef struct {
   lua_State *L;
-  std::string signal;
-  std::string name;
+  std::string sink;
+  std::string source;
 } pa_default;
 
 class luapulse {
 public:
-  luapulse(lua_State *L, bool _defaults);
+  luapulse(lua_State *L);
   ~luapulse();
 
   void setMicVolume(std::string name, unsigned int channels, int volume);
@@ -60,9 +60,8 @@ private:
   lua_State *L;
   pa_context *context;
   pa_threaded_mainloop *mainloop;
-  bool defaults;
-  unsigned int default_sink;
-  unsigned int default_source;
+  std::string default_sink;
+  std::string default_source;
 
   // State Callback, call initial handling and subscribe
   static void contextStateCallback(pa_context *c, void *userdata) {
@@ -106,14 +105,12 @@ private:
     case PA_SUBSCRIPTION_EVENT_CHANGE:
       switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
       case (PA_SUBSCRIPTION_EVENT_SINK):
-        if (pulse->default_sink == idx || !pulse->defaults)
-          pa_context_get_sink_info_by_index(pulse->context, idx, sinkChange,
-                                            pulse->L);
+        pa_context_get_sink_info_by_index(pulse->context, idx, sinkChange,
+                                          pulse->L);
         break;
       case PA_SUBSCRIPTION_EVENT_SOURCE:
-        if (pulse->default_source == idx || !pulse->defaults)
-          pa_context_get_source_info_by_index(pulse->context, idx, sourceChange,
-                                              pulse->L);
+        pa_context_get_source_info_by_index(pulse->context, idx, sourceChange,
+                                            pulse->L);
 
         break;
       case PA_SUBSCRIPTION_EVENT_SERVER:
@@ -163,43 +160,14 @@ private:
   static void serverInfoUpdate(pa_context *c, const pa_server_info *i,
                                void *userdata) {
     luapulse *pulse = static_cast<luapulse *>(userdata);
-    pa_context_get_sink_info_by_name(pulse->context, i->default_sink_name,
-                                     defaultSink, pulse);
-    pa_context_get_source_info_by_name(pulse->context, i->default_source_name,
-                                       defaultSource, pulse);
-  }
-
-  static void defaultSink(pa_context *c, const pa_sink_info *i, int eol,
-                          void *userdata) {
-    if (!eol) {
-      luapulse *pulse = static_cast<luapulse *>(userdata);
-      if (pulse->default_sink != i->index) {
-        pulse->default_sink = i->index;
-        pa_default *def = new pa_default{
-            pulse->L,
-            "luapulse::sink_default",
-            i->name,
-        };
-        printf("sink default %d\n", pulse->default_sink);
-        g_idle_add(signalDefault, def);
-      }
-    }
-  }
-
-  static void defaultSource(pa_context *c, const pa_source_info *i, int eol,
-                            void *userdata) {
-    if (!eol) {
-      luapulse *pulse = static_cast<luapulse *>(userdata);
-      if (pulse->default_source != i->index) {
-        pulse->default_source = i->index;
-        pa_default *def = new pa_default{
-            pulse->L,
-            "luapulse::source_default",
-            i->name,
-        };
-        g_idle_add(signalDefault, def);
-      }
-    }
+    pulse->default_sink = i->default_sink_name;
+    pulse->default_source = i->default_source_name;
+    pa_default *def = new pa_default{
+        pulse->L,
+        i->default_sink_name,
+        i->default_source_name,
+    };
+    g_idle_add(signalDefault, def);
   }
 
   // Callback for sink output move request when changing default Sink
@@ -207,8 +175,8 @@ private:
                               int eol, void *userdata) {
     if (!eol) {
       luapulse *pulse = static_cast<luapulse *>(userdata);
-      pa_context_move_sink_input_by_index(pulse->context, i->index,
-                                          pulse->default_sink, NULL, NULL);
+      pa_context_move_sink_input_by_name(
+          pulse->context, i->index, pulse->default_sink.c_str(), NULL, NULL);
     }
   }
 
@@ -217,8 +185,8 @@ private:
                                 int eol, void *userdata) {
     if (!eol) {
       luapulse *pulse = static_cast<luapulse *>(userdata);
-      pa_context_move_source_output_by_index(pulse->context, i->index,
-                                             pulse->default_source, NULL, NULL);
+      pa_context_move_source_output_by_name(
+          pulse->context, i->index, pulse->default_source.c_str(), NULL, NULL);
     }
   }
 
@@ -295,8 +263,14 @@ private:
     lua_getglobal(def->L, "awesome");
     lua_getfield(def->L, -1, "emit_signal");
     lua_remove(def->L, -2);
-    lua_pushstring(def->L, def->signal.c_str());
-    lua_pushstring(def->L, def->name.c_str());
+    lua_pushstring(def->L, "luapulse::default");
+    lua_newtable(def->L);
+    lua_pushliteral(def->L, "sink");
+    lua_pushstring(def->L, def->sink.c_str());
+    lua_rawset(def->L, -3);
+    lua_pushliteral(def->L, "source");
+    lua_pushstring(def->L, def->source.c_str());
+    lua_rawset(def->L, -3);
     lua_call(def->L, 2, 0);
     delete def;
     return G_SOURCE_REMOVE;

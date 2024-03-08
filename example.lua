@@ -5,13 +5,11 @@ local sources = {}
 local default_sink
 local default_source
 
-awesome.connect_signal("luapulse::sink_default", function(name)
-	default_sink = name
-	--emit update single for widgets
-end)
-
-awesome.connect_signal("luapulse::source_default", function(name)
-	default_source = name
+--Defaults changed, simplified, race condition was happening
+--sometimes default signal didn't happen before awesome loaded causing issues
+awesome.connect_signal("luapulse::default", function(defaults)
+	default_sink = defaults.sink
+  default_source = defaults.source
 	--emit update single for widgets
 end)
 
@@ -63,8 +61,9 @@ awesome.connect_signal("luapulse::new_source", function(data)
 	sources[data.name] = data
 end)
 
---Receive Only Default Device Updates (true)
-local lpulse = luapulse(true)
+--No longer supports only default updates results in extra call logic or outdated info on switching
+--handle in lua if wanted
+local lpulse = luapulse()
 lpulse:run()
 
 --awful.keys.append_global_keybindings({

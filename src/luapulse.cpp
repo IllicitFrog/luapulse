@@ -1,7 +1,6 @@
 #include "luapulse.h"
 
-luapulse::luapulse(lua_State *Lua, bool _defaults = true)
-    : defaults(_defaults) {
+luapulse::luapulse(lua_State *Lua) {
   L = Lua;
   mainloop = pa_threaded_mainloop_new();
   context = pa_context_new(pa_threaded_mainloop_get_api(mainloop), "luasub");
@@ -68,19 +67,19 @@ void luapulse::setMicVolume(std::string name, unsigned int channels,
 }
 
 void luapulse::muteSink(bool mute) {
-  pa_context_set_sink_mute_by_index(context, default_sink, mute, NULL,
+  pa_context_set_sink_mute_by_name(context, default_sink.c_str(), mute, NULL,
                                     NULL); // idx, mute, NULL, NULL);
 }
 
 void luapulse::muteSource(bool mute) {
-  pa_context_set_source_mute_by_index(context, default_source, mute, NULL,
+  pa_context_set_source_mute_by_name(context, default_source.c_str(), mute, NULL,
                                       NULL);
 }
 
 //----- Lua Functions -------
 static int luapulse_new(lua_State *L) {
   *reinterpret_cast<luapulse **>(lua_newuserdata(L, sizeof(luapulse *))) =
-      new luapulse(L, lua_isboolean(L, 2));
+      new luapulse(L);
   luaL_setmetatable(L, LUA_PULSE);
   return 1;
 }
@@ -137,18 +136,18 @@ static int luapulse_run(lua_State *L) {
 // Register luapulse in lua
 static void register_myobject(lua_State *L) {
   static const luaL_Reg meta[] = {
-    {"__gc", luapulse_delete},
-    {NULL, NULL},
+      {"__gc", luapulse_delete},
+      {NULL, NULL},
   };
   static const luaL_Reg funcs[] = {
-    {"setVolume", luapulse_setVolume},
-    {"setMicVolume", luapulse_setMicVolume},
-    {"muteSink", luapulse_muteSink},
-    {"muteSource", luapulse_muteSource},
-    {"setDefaultSink", luapulse_setDefaultSink},
-    {"setDefaultSource", luapulse_setDefaultSource},
-    {"run", luapulse_run},
-    {NULL, NULL},
+      {"setVolume", luapulse_setVolume},
+      {"setMicVolume", luapulse_setMicVolume},
+      {"muteSink", luapulse_muteSink},
+      {"muteSource", luapulse_muteSource},
+      {"setDefaultSink", luapulse_setDefaultSink},
+      {"setDefaultSource", luapulse_setDefaultSource},
+      {"run", luapulse_run},
+      {NULL, NULL},
   };
   luaL_newmetatable(L, LUA_PULSE);
   luaL_setfuncs(L, meta, 0);
@@ -157,27 +156,6 @@ static void register_myobject(lua_State *L) {
   lua_pop(L, 1);
 
   lua_pushcfunction(L, luapulse_new);
-  // lua_register(L, LUA_PULSE, luapulse_new);
-  // luaL_newmetatable(L, LUA_PULSE);
-  // lua_pushcfunction(L, luapulse_delete);
-  // lua_setfield(L, -2, "__gc");
-  // lua_pushvalue(L, -1);
-  // lua_setfield(L, -2, "__index");
-  // lua_pushcfunction(L, luapulse_setVolume);
-  // lua_setfield(L, -2, "setVolume");
-  // lua_pushcfunction(L, luapulse_setMicVolume);
-  // lua_setfield(L, -2, "setMicVolume");
-  // lua_pushcfunction(L, luapulse_muteSink);
-  // lua_setfield(L, -2, "muteSink");
-  // lua_pushcfunction(L, luapulse_muteSource);
-  // lua_setfield(L, -2, "muteSource");
-  // lua_pushcfunction(L, luapulse_setDefaultSink);
-  // lua_setfield(L, -2, "setDefaultSink");
-  // lua_pushcfunction(L, luapulse_setDefaultSource);
-  // lua_setfield(L, -2, "setDefaultSource");
-  // lua_pushcfunction(L, luapulse_run);
-  // lua_setfield(L, -2, "run");
-  // lua_pop(L, 1);
 }
 
 // Register Lua Functions
