@@ -54,11 +54,8 @@ local lpulse = luapulse()
 ### Signals:
 
 ```lua
---default sink changed
-connect_signal("luapulse::sink_default", function(name) ...
-
---default source changed
-connect_signal("luapulse::source_default", function(name) ...
+--defaults defaults={sink, source}
+connect_signal("luapulse::default", function(defaults)
 
 --sink removed
 connect_signal("luapulse::remove_sink", function(index)
