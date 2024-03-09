@@ -38,7 +38,6 @@ awesome.connect_signal("luapulse::update_sink", function(data)
 		if config.sinks[data.name].volume ~= data.volume or config.sinks[data.name].mute ~= data.mute then
 			config.sinks[data.name].volume = data.volume
 			config.sinks[data.name].mute = data.mute
-			awesome.emit_signal("volume::widget", data)
 			awesome.emit_signal("pulseaudio::update")
 		end
 	end
@@ -50,7 +49,6 @@ awesome.connect_signal("luapulse::update_source", function(data)
 		if config.sources[data.name].volume ~= data.volume or config.sources[data.name].mute ~= data.mute then
 			config.sources[data.name].volume = data.volume
 			config.sources[data.name].mute = data.mute
-			awesome.emit_signal("volume::widget", data)
 			awesome.emit_signal("pulseaudio::update")
 		end
 	end
@@ -72,34 +70,34 @@ lpulse:run()
 
 --Set Default Sink Volume
 awesome.connect_signal("luapulse::setVolume", function(volume)
-	lpulse:setVolume(config.sinks[config.default_sink].name, config.sinks[config.default_sink].channels, volume)
+	lpulse:setVolume(config.default_sink, config.sinks[config.default_sink].channels, volume)
 end)
 
 --Mute Default Sink
-awesome.connect_signal("luapulse::set_mute", function(mute)
-	lpulse:muteSink(mute)
+awesome.connect_signal("luapulse::set_mute", function(name, mute)
+	lpulse:muteSink(name, mute)
 end)
 
 --Set Default Sink
-awesome.connect_signal("luapulse::set_defaultSink", function(index, move)
-	lpulse:setDefaultSink(index, move)
+awesome.connect_signal("luapulse::set_defaultSink", function(name, move)
+	lpulse:setDefaultSink(name, move)
 end)
 
 --Set Default Source Volume
 awesome.connect_signal("luapulse::set_sourceVolume", function(volume)
 	lpulse:setMicVolume(
-		config.sources[config.default_source].name,
+		config.default_source,
 		config.sources[config.default_source].channels,
 		volume
 	)
 end)
 
 --Mute Default Source
-awesome.connect_signal("luapulse::set_sourceMute", function(mute)
-	lpulse:muteSource(mute)
+awesome.connect_signal("luapulse::set_sourceMute", function(name, mute)
+	lpulse:muteSource(name, mute)
 end)
 
 --Set Default Source
-awesome.connect_signal("luapulse::set_defaultSource", function(index, move)
-	lpulse:setDefaultSource(index, move)
+awesome.connect_signal("luapulse::set_defaultSource", function(name, move)
+	lpulse:setDefaultSource(name, move)
 end)

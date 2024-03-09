@@ -75,7 +75,7 @@ awful.key({}, "XF86AudioLowerVolume", function()
 			lpulse:setMute(true)
 		end
 	end
-	lpulse:setVolume(sinks[default_sink].name, sinks[default_sink].channels, volume)
+	lpulse:setVolume(default_sink, sinks[default_sink].channels, volume)
 end, { description = "decrease volume", group = "awesome" })
 
 awful.key({}, "XF86AudioRaiseVolume", function()
@@ -86,9 +86,9 @@ awful.key({}, "XF86AudioRaiseVolume", function()
 	if volume > 100 then
 		volume = 100
 	end
-	lpulse:setVolume(sinks[default_sink].name, sinks[default_sink].channels, volume)
+	lpulse:setVolume(default_sink.name, sinks[default_sink].channels, volume)
 end, { description = "increase volume", group = "awesome" })
 
 awful.key({}, "XF86AudioMute", function()
-	lpulse:muteSink(not sinks[default_sink].mute)
+	lpulse:muteSink(default_sink, not sinks[default_sink].mute)
 end, { description = "mute volume", group = "awesome" })

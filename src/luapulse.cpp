@@ -28,14 +28,16 @@ void luapulse::setDefaultSink(std::string name, bool move) {
 
   pa_context_set_default_sink(context, name.c_str(), NULL, NULL);
   if (move) {
-    pa_context_get_sink_input_info_list(context, sinkInputListcb, this);
+    std::string *sm = new std::string(name);
+    pa_context_get_sink_input_info_list(context, sinkInputListcb, sm);
   }
 }
 
 void luapulse::setDefaultSource(std::string name, bool move) {
-  pa_context_set_default_sink(context, name.c_str(), NULL, NULL);
+  pa_context_set_default_source(context, name.c_str(), NULL, NULL);
   if (move) {
-    pa_context_get_source_output_info_list(context, sourceInputListcb, this);
+    std::string *sm = new std::string(name);
+    pa_context_get_source_output_info_list(context, sourceInputListcb, sm);
   }
 }
 
@@ -66,13 +68,13 @@ void luapulse::setMicVolume(std::string name, unsigned int channels,
                                        NULL);
 }
 
-void luapulse::muteSink(bool mute) {
-  pa_context_set_sink_mute_by_name(context, default_sink.c_str(), mute, NULL,
+void luapulse::muteSink(std::string name, bool mute) {
+  pa_context_set_sink_mute_by_name(context, name.c_str(), mute, NULL,
                                     NULL); // idx, mute, NULL, NULL);
 }
 
-void luapulse::muteSource(bool mute) {
-  pa_context_set_source_mute_by_name(context, default_source.c_str(), mute, NULL,
+void luapulse::muteSource(std::string name, bool mute) {
+  pa_context_set_source_mute_by_name(context, name.c_str(), mute, NULL,
                                       NULL);
 }
 
@@ -118,13 +120,13 @@ static int luapulse_setMicVolume(lua_State *L) {
 
 static int luapulse_muteSink(lua_State *L) {
   (*reinterpret_cast<luapulse **>(luaL_checkudata(L, 1, LUA_PULSE)))
-      ->muteSink(lua_toboolean(L, 2));
+      ->muteSink(luaL_checkstring(L, 2), lua_toboolean(L, 3));
   return 0;
 }
 
 static int luapulse_muteSource(lua_State *L) {
   (*reinterpret_cast<luapulse **>(luaL_checkudata(L, 1, LUA_PULSE)))
-      ->muteSource(lua_toboolean(L, 2));
+      ->muteSource(luaL_checkstring(L, 2),lua_toboolean(L, 3));
   return 0;
 }
 

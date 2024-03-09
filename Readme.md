@@ -39,10 +39,10 @@ local lpulse = luapulse()
  lpulse:setMicVolume(name, channels, volume)
 
  --Mute default sink
- lpulse:muteSink(bool)
+ lpulse:muteSink(name, bool)
 
  --Mute default source
- lpulse:muteSource(bool)
+ lpulse:muteSource(name, bool)
 
  --Set default sink by name and optionally move inputs
  lpulse:setDefaultSink(name, bool)

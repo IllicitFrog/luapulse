@@ -50,8 +50,8 @@ public:
 
   void setMicVolume(std::string name, unsigned int channels, int volume);
   void setVolume(std::string name, unsigned int channels, int volume);
-  void muteSink(bool mute);
-  void muteSource(bool mute);
+  void muteSink(std::string name, bool mute);
+  void muteSource(std::string name, bool mute);
   void setDefaultSink(std::string name, bool move);
   void setDefaultSource(std::string name, bool move);
   void run();
@@ -60,8 +60,6 @@ private:
   lua_State *L;
   pa_context *context;
   pa_threaded_mainloop *mainloop;
-  std::string default_sink;
-  std::string default_source;
 
   // State Callback, call initial handling and subscribe
   static void contextStateCallback(pa_context *c, void *userdata) {
@@ -160,8 +158,6 @@ private:
   static void serverInfoUpdate(pa_context *c, const pa_server_info *i,
                                void *userdata) {
     luapulse *pulse = static_cast<luapulse *>(userdata);
-    pulse->default_sink = i->default_sink_name;
-    pulse->default_source = i->default_source_name;
     pa_default *def = new pa_default{
         pulse->L,
         i->default_sink_name,
@@ -174,9 +170,10 @@ private:
   static void sinkInputListcb(pa_context *c, const pa_sink_input_info *i,
                               int eol, void *userdata) {
     if (!eol) {
-      luapulse *pulse = static_cast<luapulse *>(userdata);
+      std::string* name = (std::string*)userdata;
       pa_context_move_sink_input_by_name(
-          pulse->context, i->index, pulse->default_sink.c_str(), NULL, NULL);
+          c, i->index, name->c_str(), NULL, NULL);
+      delete name;
     }
   }
 
@@ -184,9 +181,10 @@ private:
   static void sourceInputListcb(pa_context *c, const pa_source_output_info *i,
                                 int eol, void *userdata) {
     if (!eol) {
-      luapulse *pulse = static_cast<luapulse *>(userdata);
+      std::string* name = (std::string*)userdata;
       pa_context_move_source_output_by_name(
-          pulse->context, i->index, pulse->default_source.c_str(), NULL, NULL);
+          c, i->index, name->c_str(), NULL, NULL);
+      delete name;
     }
   }
 
