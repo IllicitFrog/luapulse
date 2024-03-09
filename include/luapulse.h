@@ -60,6 +60,8 @@ private:
   lua_State *L;
   pa_context *context;
   pa_threaded_mainloop *mainloop;
+  std::string move_sink;
+  std::string move_source;
 
   // State Callback, call initial handling and subscribe
   static void contextStateCallback(pa_context *c, void *userdata) {
@@ -173,7 +175,6 @@ private:
       std::string* name = (std::string*)userdata;
       pa_context_move_sink_input_by_name(
           c, i->index, name->c_str(), NULL, NULL);
-      delete name;
     }
   }
 
@@ -184,7 +185,6 @@ private:
       std::string* name = (std::string*)userdata;
       pa_context_move_source_output_by_name(
           c, i->index, name->c_str(), NULL, NULL);
-      delete name;
     }
   }
 

@@ -28,16 +28,16 @@ void luapulse::setDefaultSink(std::string name, bool move) {
 
   pa_context_set_default_sink(context, name.c_str(), NULL, NULL);
   if (move) {
-    std::string *sm = new std::string(name);
-    pa_context_get_sink_input_info_list(context, sinkInputListcb, sm);
+    move_sink = name;
+    pa_context_get_sink_input_info_list(context, sinkInputListcb, &move_sink);
   }
 }
 
 void luapulse::setDefaultSource(std::string name, bool move) {
   pa_context_set_default_source(context, name.c_str(), NULL, NULL);
   if (move) {
-    std::string *sm = new std::string(name);
-    pa_context_get_source_output_info_list(context, sourceInputListcb, sm);
+    move_source = name; 
+    pa_context_get_source_output_info_list(context, sourceInputListcb, &move_source);
   }
 }
 
