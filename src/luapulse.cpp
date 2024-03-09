@@ -98,7 +98,7 @@ static int luapulse_setDefaultSink(lua_State *L) {
 
 static int luapulse_setDefaultSource(lua_State *L) {
   (*reinterpret_cast<luapulse **>(luaL_checkudata(L, 1, LUA_PULSE)))
-      ->setDefaultSink(luaL_checkstring(L, 2), lua_isboolean(L, 3));
+      ->setDefaultSource(luaL_checkstring(L, 2), lua_isboolean(L, 3));
   return 0;
 }
 
